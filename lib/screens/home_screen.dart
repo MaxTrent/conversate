@@ -1,10 +1,8 @@
-import 'package:conversate/pages/calls.dart';
-import 'package:conversate/pages/messages.dart';
-import 'package:conversate/pages/notifications.dart';
+import 'package:conversate/pages/pages.dart';
+import 'package:conversate/widgets/widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import '../pages/contacts.dart';
+import '../helpers.dart';
 import '../theme.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -35,6 +33,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: ValueListenableBuilder(
@@ -49,7 +48,22 @@ class HomeScreen extends StatelessWidget {
             );
           },
         ),
+        leadingWidth: 53,
+        leading: Align(
+          alignment: Alignment.centerRight,
+          child: IconBackground(icon: Icons.search,
+          onTap: (){
+            print('TODO search');
+          },),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 24.0),
+            child: Avatar.small(url: Helpers.randomPictureUrl()),
+          )
+        ],
       ),
+
       body: ValueListenableBuilder(
         valueListenable: pageIndex,
         builder: (BuildContext context, int value, _) {
