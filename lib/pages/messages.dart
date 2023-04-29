@@ -48,7 +48,7 @@ class _MessageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){
+      onTap: () {
         Navigator.of(context).push(ChatScreen.route(messageData));
       },
       child: Container(
@@ -176,7 +176,8 @@ class _Stories extends StatelessWidget {
                         child: _StoryCard(
                             storyData: StoryData(
                                 name: faker.person.name(),
-                                url: Helpers.randomPictureUrl())),
+                              url: Helpers.randomPictureUrl(),
+                            )),
                       ),
                     );
                   }),

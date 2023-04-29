@@ -24,10 +24,10 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       title: 'Conversate',
       builder: (context, child){
-        return StreamChatCore(client: null,
+        return StreamChatCore(client: client,
         child: child!);
       },
-      home: HomeScreen(),
+      home: const SelectUserScreen(),
     );
   }
 }
