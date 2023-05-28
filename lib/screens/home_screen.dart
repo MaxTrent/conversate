@@ -1,4 +1,6 @@
+import 'package:conversate/app.dart';
 import 'package:conversate/pages/pages.dart';
+import 'package:conversate/screens/screens.dart';
 import 'package:conversate/widgets/widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -62,8 +64,15 @@ class HomeScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 24.0),
-            child: Avatar.small(url: Helpers.randomPictureUrl()),
-          )
+            child: Hero(
+              tag: 'hero-profile-picture',
+              child: Avatar.small(url: context.currentUserImage,
+              onTap: (){
+                Navigator.of(context).push(ProfileScreen.route);
+              }),
+            ),
+          ),
+
         ],
       ),
 
