@@ -10,7 +10,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.client});
+  const MyApp({super.key, required this.client,});
 
   final StreamChatClient client;
 
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       title: 'Conversate',
       builder: (context, child){
         return StreamChatCore(client: client,
-        child: child!);
+        child: ChannelsBloc(child: child!));
       },
       home: const SelectUserScreen(),
     );

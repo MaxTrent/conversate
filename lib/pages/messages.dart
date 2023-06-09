@@ -3,7 +3,7 @@ import 'package:conversate/screens/screens.dart';
 import 'package:conversate/widgets/display_error_message.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
+// import 'package:jiffy/jiffy.dart';
 import 'dart:core';
 import '../models/models.dart';
 import '../theme.dart';
@@ -13,14 +13,23 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 class MessagesPage extends StatefulWidget {
   const MessagesPage({Key? key}) : super(key: key);
 
+
+
   @override
   State<MessagesPage> createState() => _MessagesPageState();
 }
 
 class _MessagesPageState extends State<MessagesPage> {
+
+
+  // late final Channel channel;
+
+
+
+
   @override
   Widget build(BuildContext context) {
-    return MessageListCore(
+    return ChannelListCore(
         emptyBuilder: (context) =>
         const Center(
           child: Text(
@@ -32,8 +41,8 @@ class _MessagesPageState extends State<MessagesPage> {
             DisplayErrorMessage(
               error: error,
             ),
-        loadingBuilder: (context,) =>
-            Center(
+        loadingBuilder: (context) =>
+            const Center(
               child: SizedBox(
                 height: 100,
                 width: 100,
@@ -42,11 +51,11 @@ class _MessagesPageState extends State<MessagesPage> {
                 ),
               ),
             ),
-        messageListBuilder: (context, channels) {
+        listBuilder: (context, channels) {
           return CustomScrollView(
             slivers: [
               const SliverToBoxAdapter(child: _Stories()),
-              SliverList(delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              SliverList(delegate: SliverChildBuilderDelegate((context,index) {
               return const Text('...');
               },
                   childCount: channels.length))
