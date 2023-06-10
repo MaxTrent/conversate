@@ -2,18 +2,27 @@ import 'package:conversate/models/models.dart';
 import 'package:conversate/widgets/widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../theme.dart';
 
 class ChatScreen extends StatelessWidget {
-  static Route route(MessageData data) => MaterialPageRoute(
-      builder: (context) => ChatScreen(
-            messageData: data,
-          ));
+  // static Route route(MessageData data) => MaterialPageRoute(
+  //     builder: (context) => ChatScreen(
+  //           messageData: data,
+  //         ));
 
-  const ChatScreen({Key? key, required this.messageData}) : super(key: key);
+  static Route routeWithChannel(Channel channel) => MaterialPageRoute(
+    builder: (context) => StreamChannel(
+      channel: channel,
+      child: const ChatScreen(),
+    ),
+  );
 
-  final MessageData messageData;
+
+  const ChatScreen({Key? key}) : super(key: key);
+
+  // final MessageData messageData;
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +42,9 @@ class ChatScreen extends StatelessWidget {
             },
           ),
         ),
-        title: _AppBarTitle(
-          messageData: messageData,
-        ),
+        // title: _AppBarTitle(
+        //   messageData: messageData,
+        // ),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),

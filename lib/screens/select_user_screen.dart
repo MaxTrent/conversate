@@ -18,7 +18,6 @@ class SelectUserScreen extends StatefulWidget {
 
 class _SelectUserScreenState extends State<SelectUserScreen> {
   bool _loading = false;
-
   Future<void> onUserSelected(UserDemo user) async {
     setState(() {
       _loading = true;

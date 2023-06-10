@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart' as log;
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-const streamKey = 'nh8wjwwfe95t';
+const streamKey = 'c2y6adc6cm92';
 var logger = log.Logger();
 
 
