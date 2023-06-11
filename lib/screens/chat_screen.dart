@@ -1,6 +1,6 @@
 import 'package:conversate/app.dart';
 import 'package:conversate/helpers.dart';
-import 'package:conversate/models/models.dart';
+// import 'package:conversate/models/models.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:conversate/widgets/widget.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +9,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../theme.dart';
+import '../widgets/display_error_message.dart';
 
 class ChatScreen extends StatelessWidget {
   // static Route route(MessageData data) => MaterialPageRoute(
@@ -45,7 +46,7 @@ class ChatScreen extends StatelessWidget {
             },
           ),
         ),
-        title: _AppBarTitle(),
+        title: const _AppBarTitle(),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -68,64 +69,134 @@ class ChatScreen extends StatelessWidget {
         ],
       ),
       body: Column(
-        children: const [
-          Expanded(child: _DemoMessageList()),
-          _ActionBar(),
+        children: [
+          Expanded(
+            child: MessageListCore(
+              loadingBuilder: (context) {
+                return const Center(child: CircularProgressIndicator());
+              },
+              emptyBuilder: (context) => const SizedBox.shrink(),
+              errorBuilder: (context, error) =>
+                  DisplayErrorMessage(error: error),
+              messageListBuilder: (context, messages) =>
+                  _MessageList(messages: messages),
+            ),
+          ),
+          // Column(
+          //   children: const [
+          //     Expanded(child: _DemoMessageList()),
+          const _ActionBar(),
         ],
       ),
     );
   }
 }
 
-class _DemoMessageList extends StatelessWidget {
-  const _DemoMessageList({Key? key}) : super(key: key);
+class _MessageList extends StatelessWidget {
+  const _MessageList({
+    Key? key,
+    required this.messages,
+  }) : super(key: key);
+
+  final List<Message> messages;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: ListView(
-        children: const [
-          _DateLabel(label: 'Yesterday'),
-          _MessageTile(
-            message: 'Hi, Lucy! How\'s your day going?',
-            messageDate: '12:01 PM',
-          ),
-          _MessageOwnTile(
-            message: 'You know how it goes...',
-            messageDate: '12:02 PM',
-          ),
-          _MessageTile(
-            message: 'Do you want Starbucks?',
-            messageDate: '12:02 PM',
-          ),
-          _MessageOwnTile(
-            message: 'Would be awesome!',
-            messageDate: '12:03 PM',
-          ),
-          _MessageTile(
-            message: 'Coming up!',
-            messageDate: '12:03 PM',
-          ),
-          _MessageOwnTile(
-            message: 'YAY!!!',
-            messageDate: '12:03 PM',
-          ),
-        ],
+      padding: const EdgeInsets.all(8.0),
+      child: ListView.separated(
+        itemCount: messages.length + 1,
+        reverse: true,
+        separatorBuilder: (context, index) {
+          if (index == messages.length - 1) {
+            return _DateLabel(dateTime: messages[index].createdAt);
+          }
+          if (messages.length == 1) {
+            return const SizedBox.shrink();
+          } else if (index >= messages.length - 1) {
+            return const SizedBox.shrink();
+          } else if (index <= messages.length) {
+            final message = messages[index];
+            final nextMessage = messages[index + 1];
+            if (!Jiffy(message.createdAt.toLocal())
+                .isSame(nextMessage.createdAt.toLocal(), Units.DAY)) {
+              return _DateLabel(
+                dateTime: message.createdAt,
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          } else {
+            return const SizedBox.shrink();
+          }
+        },
+        itemBuilder: (context, index) {
+          if (index < messages.length) {
+            final message = messages[index];
+            if (message.user?.id == context.currentUser?.id) {
+              return _MessageOwnTile(message: message);
+            } else {
+              return _MessageTile(message: message);
+            }
+          } else {
+            return const SizedBox.shrink();
+          }
+        },
       ),
     );
   }
 }
+
+// class _DemoMessageList extends StatelessWidget {
+//   const _DemoMessageList({Key? key}) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+//       child: ListView(
+//         children: const [
+//           _DateLabel(label: 'Yesterday'),
+//           _MessageTile(
+//             message: 'Hi, Lucy! How\'s your day going?',
+//             messageDate: '12:01 PM',
+//           ),
+//           _MessageOwnTile(
+//             message: 'You know how it goes...',
+//             messageDate: '12:02 PM',
+//           ),
+//           _MessageTile(
+//             message: 'Do you want Starbucks?',
+//             messageDate: '12:02 PM',
+//           ),
+//           _MessageOwnTile(
+//             message: 'Would be awesome!',
+//             messageDate: '12:03 PM',
+//           ),
+//           _MessageTile(
+//             message: 'Coming up!',
+//             messageDate: '12:03 PM',
+//           ),
+//           _MessageOwnTile(
+//             message: 'YAY!!!',
+//             messageDate: '12:03 PM',
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class _MessageTile extends StatelessWidget {
   const _MessageTile({
     Key? key,
     required this.message,
-    required this.messageDate,
+    // required this.messageDate,
   }) : super(key: key);
 
-  final String message;
-  final String messageDate;
+  final Message message;
+
+  // final String messageDate;
 
   static const _borderRadius = 26.0;
 
@@ -151,13 +222,13 @@ class _MessageTile extends StatelessWidget {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
-                child: Text(message),
+                child: Text(message.text ?? 'No Message'),
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
-                messageDate,
+                message.createdAt.toLocal().toString(),
                 style: const TextStyle(
                   color: AppColors.textFaded,
                   fontSize: 10,
@@ -176,11 +247,12 @@ class _MessageOwnTile extends StatelessWidget {
   const _MessageOwnTile({
     Key? key,
     required this.message,
-    required this.messageDate,
+    // required this.messageDate,
   }) : super(key: key);
 
-  final String message;
-  final String messageDate;
+  final Message message;
+
+  // final String messageDate;
 
   static const _borderRadius = 26.0;
 
@@ -206,7 +278,7 @@ class _MessageOwnTile extends StatelessWidget {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
-                child: Text(message,
+                child: Text(message.text ?? '',
                     style: const TextStyle(
                       color: AppColors.textLight,
                     )),
@@ -215,7 +287,7 @@ class _MessageOwnTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
-                messageDate,
+                message.createdAt.toLocal().toString(),
                 style: const TextStyle(
                   color: AppColors.textFaded,
                   fontSize: 10,
@@ -230,13 +302,48 @@ class _MessageOwnTile extends StatelessWidget {
   }
 }
 
-class _DateLabel extends StatelessWidget {
+class _DateLabel extends StatefulWidget {
   const _DateLabel({
     Key? key,
-    required this.label,
+    required this.dateTime,
   }) : super(key: key);
 
-  final String label;
+  // final String label;
+  final DateTime dateTime;
+
+  @override
+  State<_DateLabel> createState() => _DateLabelState();
+}
+
+class _DateLabelState extends State<_DateLabel> {
+  late String dayInfo;
+
+  @override
+  void initState() {
+    final createdAt = Jiffy(widget.dateTime);
+    final now = DateTime.now();
+
+    if (Jiffy(createdAt).isSame(now, Units.DAY)) {
+      dayInfo = 'TODAY';
+    } else if (Jiffy(createdAt)
+        .isSame(now.subtract(const Duration(days: 1)), Units.DAY)) {
+      dayInfo = 'YESTERDAY';
+    } else if (Jiffy(createdAt).isAfter(
+      now.subtract(const Duration(days: 7)),
+      Units.DAY,
+    )) {
+      dayInfo = createdAt.EEEE;
+    } else if (Jiffy(createdAt).isAfter(
+      Jiffy(now).subtract(years: 1),
+      Units.DAY,
+    )) {
+      dayInfo = createdAt.MMMd;
+    } else {
+      dayInfo = createdAt.MMMd;
+    }
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +358,7 @@ class _DateLabel extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 12),
             child: Text(
-              label,
+              dayInfo,
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -265,8 +372,31 @@ class _DateLabel extends StatelessWidget {
   }
 }
 
-class _ActionBar extends StatelessWidget {
+class _ActionBar extends StatefulWidget {
   const _ActionBar({Key? key}) : super(key: key);
+
+  @override
+  __ActionBarState createState() => __ActionBarState();
+}
+
+class __ActionBarState extends State<_ActionBar> {
+  final TextEditingController controller = TextEditingController();
+
+  Future<void> _sendMessage() async {
+    if (controller.text.isNotEmpty) {
+      StreamChannel.of(context)
+          .channel
+          .sendMessage(Message(text: controller.text));
+      controller.clear();
+      FocusScope.of(context).unfocus();
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -291,15 +421,20 @@ class _ActionBar extends StatelessWidget {
               ),
             ),
           ),
-          const Expanded(
+          Expanded(
             child: Padding(
-              padding: EdgeInsets.only(left: 16.0),
+              padding: const EdgeInsets.only(left: 16.0),
               child: TextField(
-                style: TextStyle(fontSize: 14),
-                decoration: InputDecoration(
+                controller: controller,
+                onChanged: (val) {
+                  StreamChannel.of(context).channel.keyStroke();
+                },
+                style: const TextStyle(fontSize: 14),
+                decoration: const InputDecoration(
                   hintText: 'Type something...',
                   border: InputBorder.none,
                 ),
+                onSubmitted: (_) => _sendMessage(),
               ),
             ),
           ),
@@ -311,18 +446,14 @@ class _ActionBar extends StatelessWidget {
             child: GlowingButton(
               color: AppColors.accent,
               icon: Icons.send_rounded,
-              onPressed: () {
-                print('TODO: send a message');
-              },
+              onPressed: _sendMessage,
             ),
           ),
         ],
       ),
     );
   }
-}
-
-class _AppBarTitle extends StatelessWidget {
+}class _AppBarTitle extends StatelessWidget {
   const _AppBarTitle({Key? key}) : super(key: key);
 
   @override
@@ -396,10 +527,11 @@ class _AppBarTitle extends StatelessWidget {
       ],
     );
   }
+
   Widget _buildConnectedTitleState(
-      BuildContext context,
-      List<Member>? members,
-      ) {
+    BuildContext context,
+    List<Member>? members,
+  ) {
     Widget? alternativeWidget;
     final channel = StreamChannel.of(context).channel;
     final memberCount = channel.memberCount;
@@ -415,7 +547,7 @@ class _AppBarTitle extends StatelessWidget {
     } else {
       final userId = StreamChatCore.of(context).currentUser?.id;
       final otherMember = members?.firstWhereOrNull(
-            (element) => element.userId != userId,
+        (element) => element.userId != userId,
       );
 
       if (otherMember != null) {
@@ -431,7 +563,7 @@ class _AppBarTitle extends StatelessWidget {
         } else {
           alternativeWidget = Text(
             'Last online: '
-                '${Jiffy(otherMember.user?.lastActive).fromNow()}',
+            '${Jiffy(otherMember.user?.lastActive).fromNow()}',
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
@@ -448,8 +580,6 @@ class _AppBarTitle extends StatelessWidget {
   }
 }
 
-
-
 class TypingIndicator extends StatelessWidget {
   /// Instantiate a new TypingIndicator
   const TypingIndicator({
@@ -464,7 +594,7 @@ class TypingIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final channelState = StreamChannel.of(context).channel.state!;
 
-    final altWidget = alternativeWidget ?? const SizedBox.shrink();
+    final altWidget = alternativeWidget ?? const Offstage();
 
     return BetterStreamBuilder<Iterable<User>>(
       initialData: channelState.typingEvents.keys,
@@ -477,22 +607,22 @@ class TypingIndicator extends StatelessWidget {
             duration: const Duration(milliseconds: 300),
             child: data.isNotEmpty == true
                 ? const Align(
-              alignment: Alignment.centerLeft,
-              key: ValueKey('typing-text'),
-              child: Text(
-                'Typing message',
-                maxLines: 1,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
+                    alignment: Alignment.centerLeft,
+                    key: ValueKey('typing-text'),
+                    child: Text(
+                      'Typing message',
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
                 : Align(
-              alignment: Alignment.centerLeft,
-              key: const ValueKey('altwidget'),
-              child: altWidget,
-            ),
+                    alignment: Alignment.centerLeft,
+                    key: const ValueKey('altwidget'),
+                    child: altWidget,
+                  ),
           ),
         );
       },
