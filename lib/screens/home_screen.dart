@@ -66,13 +66,13 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.only(right: 24.0),
             child: Hero(
               tag: 'hero-profile-picture',
-              child: Avatar.small(url: context.currentUserImage,
-              onTap: (){
-                Navigator.of(context).push(ProfileScreen.route);
-              }),
+              child: Avatar.small(
+                  url: context.currentUserImage,
+                  onTap: () {
+                    Navigator.of(context).push(ProfileScreen.route);
+                  }),
             ),
           ),
-
         ],
       ),
 
@@ -143,22 +143,22 @@ class _BottomNavigationBarState extends State<_BottomNavigationBar> {
                 onTap: handleItemSelected,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: GlowingButton(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: GlowingButton(
                     color: AppColors.secondary,
                     icon: CupertinoIcons.add,
                     onPressed: () {
-         showDialog(
-         context: context,
-                           builder: (BuildContext context) => const Dialog(
-                  child: AspectRatio(
-                    aspectRatio: 8 / 7,
-                        child: ContactsPage(),
-    ),
-    ),
-    );
-    },
-    )),
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => const Dialog(
+                          child: AspectRatio(
+                            aspectRatio: 8 / 7,
+                            child: ContactsPage(),
+                          ),
+                        ),
+                      );
+                    },
+                  )),
               _NavigationBarItem(
                 index: 2,
                 label: 'Calls',

@@ -1,7 +1,11 @@
+import 'package:conversate/app.dart';
+import 'package:conversate/helpers.dart';
 import 'package:conversate/models/models.dart';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:conversate/widgets/widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../theme.dart';
@@ -13,12 +17,11 @@ class ChatScreen extends StatelessWidget {
   //         ));
 
   static Route routeWithChannel(Channel channel) => MaterialPageRoute(
-    builder: (context) => StreamChannel(
-      channel: channel,
-      child: const ChatScreen(),
-    ),
-  );
-
+        builder: (context) => StreamChannel(
+          channel: channel,
+          child: const ChatScreen(),
+        ),
+      );
 
   const ChatScreen({Key? key}) : super(key: key);
 
@@ -42,9 +45,7 @@ class ChatScreen extends StatelessWidget {
             },
           ),
         ),
-        // title: _AppBarTitle(
-        //   messageData: messageData,
-        // ),
+        title: _AppBarTitle(),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -149,7 +150,7 @@ class _MessageTile extends StatelessWidget {
               ),
               child: Padding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
                 child: Text(message),
               ),
             ),
@@ -204,7 +205,7 @@ class _MessageOwnTile extends StatelessWidget {
               ),
               child: Padding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
                 child: Text(message,
                     style: const TextStyle(
                       color: AppColors.textLight,
@@ -228,7 +229,6 @@ class _MessageOwnTile extends StatelessWidget {
     );
   }
 }
-
 
 class _DateLabel extends StatelessWidget {
   const _DateLabel({
@@ -321,20 +321,17 @@ class _ActionBar extends StatelessWidget {
     );
   }
 }
-class _AppBarTitle extends StatelessWidget {
-  const _AppBarTitle({
-    Key? key,
-    required this.messageData,
-  }) : super(key: key);
 
-  final MessageData messageData;
+class _AppBarTitle extends StatelessWidget {
+  const _AppBarTitle({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
     return Row(
       children: [
         Avatar.small(
-          url: messageData.profilePictureUrl,
+          url: Helpers.getChannelImage(channel, context.currentUser!),
         ),
         const SizedBox(
           width: 16,
@@ -345,26 +342,203 @@ class _AppBarTitle extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                messageData.senderName,
+                Helpers.getChannelName(channel, context.currentUser!),
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14,
-                // color: Colors.black
+                style: const TextStyle(
+                  fontSize: 14,
+                  // color: Colors.black
                 ),
               ),
               const SizedBox(height: 2),
-              const Text(
-                'Online now',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
+              BetterStreamBuilder<List<Member>>(
+                stream: channel.state!.membersStream,
+                initialData: channel.state!.members,
+                builder: (context, data) => ConnectionStatusBuilder(
+                  statusBuilder: (context, status) {
+                    switch (status) {
+                      case ConnectionStatus.connected:
+                        return _buildConnectedTitleState(context, data);
+                      case ConnectionStatus.connecting:
+                        return const Text(
+                          'Connecting',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        );
+                      case ConnectionStatus.disconnected:
+                        return const Text(
+                          'Offline',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        );
+                      default:
+                        return const SizedBox.shrink();
+                    }
+                  },
                 ),
               ),
+              // const Text(
+              //   'Online now',
+              //   style: TextStyle(
+              //     fontSize: 10,
+              //     fontWeight: FontWeight.bold,
+              //     color: Colors.green,
+              //   ),
+              // ),
             ],
           ),
         )
       ],
     );
   }
+  Widget _buildConnectedTitleState(
+      BuildContext context,
+      List<Member>? members,
+      ) {
+    Widget? alternativeWidget;
+    final channel = StreamChannel.of(context).channel;
+    final memberCount = channel.memberCount;
+    if (memberCount != null && memberCount > 2) {
+      var text = 'Members: $memberCount';
+      final watcherCount = channel.state?.watcherCount ?? 0;
+      if (watcherCount > 0) {
+        text = 'watchers $watcherCount';
+      }
+      alternativeWidget = Text(
+        text,
+      );
+    } else {
+      final userId = StreamChatCore.of(context).currentUser?.id;
+      final otherMember = members?.firstWhereOrNull(
+            (element) => element.userId != userId,
+      );
+
+      if (otherMember != null) {
+        if (otherMember.user?.online == true) {
+          alternativeWidget = const Text(
+            'Online',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
+            ),
+          );
+        } else {
+          alternativeWidget = Text(
+            'Last online: '
+                '${Jiffy(otherMember.user?.lastActive).fromNow()}',
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+
+    return TypingIndicator(
+      alternativeWidget: alternativeWidget,
+    );
+  }
 }
 
+
+
+class TypingIndicator extends StatelessWidget {
+  /// Instantiate a new TypingIndicator
+  const TypingIndicator({
+    Key? key,
+    this.alternativeWidget,
+  }) : super(key: key);
+
+  /// Widget built when no typings is happening
+  final Widget? alternativeWidget;
+
+  @override
+  Widget build(BuildContext context) {
+    final channelState = StreamChannel.of(context).channel.state!;
+
+    final altWidget = alternativeWidget ?? const SizedBox.shrink();
+
+    return BetterStreamBuilder<Iterable<User>>(
+      initialData: channelState.typingEvents.keys,
+      stream: channelState.typingEventsStream
+          .map((typings) => typings.entries.map((e) => e.key)),
+      builder: (context, data) {
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: data.isNotEmpty == true
+                ? const Align(
+              alignment: Alignment.centerLeft,
+              key: ValueKey('typing-text'),
+              child: Text(
+                'Typing message',
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+                : Align(
+              alignment: Alignment.centerLeft,
+              key: const ValueKey('altwidget'),
+              child: altWidget,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ConnectionStatusBuilder extends StatelessWidget {
+  /// Creates a new ConnectionStatusBuilder
+  const ConnectionStatusBuilder({
+    Key? key,
+    required this.statusBuilder,
+    this.connectionStatusStream,
+    this.errorBuilder,
+    this.loadingBuilder,
+  }) : super(key: key);
+
+  /// The asynchronous computation to which this builder is currently connected.
+  final Stream<ConnectionStatus>? connectionStatusStream;
+
+  /// The builder that will be used in case of error
+  final Widget Function(BuildContext context, Object? error)? errorBuilder;
+
+  /// The builder that will be used in case of loading
+  final WidgetBuilder? loadingBuilder;
+
+  /// The builder that will be used in case of data
+  final Widget Function(BuildContext context, ConnectionStatus status)
+      statusBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    final stream = connectionStatusStream ??
+        StreamChatCore.of(context).client.wsConnectionStatusStream;
+    final client = StreamChatCore.of(context).client;
+    return BetterStreamBuilder<ConnectionStatus>(
+      initialData: client.wsConnectionStatus,
+      stream: stream,
+      noDataBuilder: loadingBuilder,
+      errorBuilder: (context, error) {
+        if (errorBuilder != null) {
+          return errorBuilder!(context, error);
+        }
+        return const Offstage();
+      },
+      builder: statusBuilder,
+    );
+  }
+}
