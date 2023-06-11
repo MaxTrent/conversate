@@ -135,23 +135,28 @@ class _MessageTile extends StatelessWidget {
             const SizedBox(
               height: 8,
             ),
-            Container(
-              width: 18,
-              height: 18,
-              decoration: const BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text(
-                  '1',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppColors.textLight,
-                  ),
-                ),
+            Center(
+              child: UnreadIndicator(
+                channel: channel
               ),
             ),
+            // Container(
+            //   width: 18,
+            //   height: 18,
+            //   decoration: const BoxDecoration(
+            //     color: AppColors.secondary,
+            //     shape: BoxShape.circle,
+            //   ),
+            //   child: const Center(
+            //     child: Text(
+            //       '1',
+            //       style: TextStyle(
+            //         fontSize: 10,
+            //         color: AppColors.textLight,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

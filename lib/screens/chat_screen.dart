@@ -228,7 +228,7 @@ class _MessageTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
-                message.createdAt.toLocal().toString(),
+                Jiffy(message.createdAt.toLocal().toString()).jm,
                 style: const TextStyle(
                   color: AppColors.textFaded,
                   fontSize: 10,
@@ -287,7 +287,7 @@ class _MessageOwnTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
-                message.createdAt.toLocal().toString(),
+                Jiffy(message.createdAt.toLocal().toString()).jm,
                 style: const TextStyle(
                   color: AppColors.textFaded,
                   fontSize: 10,
