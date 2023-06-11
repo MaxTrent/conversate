@@ -169,14 +169,27 @@ class _MessageTile extends StatelessWidget {
   }
 
   Widget _buildLastMessage() {
-    return BetterStreamBuilder<Message>(
-        stream: channel.state!.lastMessageStream,
-        initialData: channel.state!.lastMessage,
-        builder: (context, lastMessage){
-          return Text(lastMessage.text ?? '',
-          overflow: TextOverflow.ellipsis,
-          );
-        });
+    return BetterStreamBuilder<int>(
+    stream: channel.state!.unreadCountStream,
+      initialData: channel.state!.unreadCount ?? 0,
+      builder: (context, count) {
+      return BetterStreamBuilder<Message>(
+          stream: channel.state!.lastMessageStream,
+          initialData: channel.state!.lastMessage,
+          builder: (context, lastMessage) {
+            return Text(lastMessage.text ?? '',
+              overflow: TextOverflow.ellipsis,
+              style: (count > 0)
+                  ? const TextStyle(
+                fontSize: 12,
+                color: AppColors.secondary,
+              )
+                  : const TextStyle(
+                fontSize: 12,
+                color: AppColors.textFaded,
+              ),
+            );
+          });},);
   }
   Widget _buildLastMessageAt() {
     return BetterStreamBuilder<DateTime>(
