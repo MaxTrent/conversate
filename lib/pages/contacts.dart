@@ -58,10 +58,10 @@ class _ContactTile extends StatelessWidget {
       ]
     });
     await channel.watch();
-    //
-    // Navigator.of(context).push(
-    //   ChatScreen.routeWithChannel(channel),
-    // );
+
+    Navigator.of(context).push(
+      ChatScreen.routeWithChannel(channel),
+    );
   }
 
   @override

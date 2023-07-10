@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:conversate/app.dart';
 import 'package:conversate/helpers.dart';
 // import 'package:conversate/models/models.dart';
@@ -11,7 +13,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import '../theme.dart';
 import '../widgets/display_error_message.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   // static Route route(MessageData data) => MaterialPageRoute(
   //     builder: (context) => ChatScreen(
   //           messageData: data,
@@ -26,8 +28,37 @@ class ChatScreen extends StatelessWidget {
 
   const ChatScreen({Key? key}) : super(key: key);
 
-  // final MessageData messageData;
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
 
+class _ChatScreenState extends State<ChatScreen> {
+
+  late StreamSubscription<int> unreadCountSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    unreadCountSubscription = StreamChannel.of(context)
+        .channel
+        .state!
+        .unreadCountStream
+        .listen(_unreadCountHandler);
+  }
+
+  Future<void> _unreadCountHandler(int count) async {
+    if (count > 0) {
+      await StreamChannel.of(context).channel.markRead();
+    }
+  }
+
+  @override
+  void dispose() {
+    unreadCountSubscription.cancel();
+    super.dispose();
+  }
+  // final MessageData messageData;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
