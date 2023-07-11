@@ -1,10 +1,18 @@
 import 'package:conversate/app.dart';
 import 'package:conversate/screens/screens.dart';
 import 'package:conversate/theme.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-void main() {
+import 'firebase_options.dart';
+
+
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  options: DefaultFirebaseOptions.currentPlatform;
   final client = StreamChatClient((streamKey));
   runApp(MyApp(
     client: client, appTheme: AppTheme(),

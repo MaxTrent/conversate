@@ -8,6 +8,7 @@ import '../helpers.dart';
 import '../theme.dart';
 
 class HomeScreen extends StatelessWidget {
+  static Route get route => MaterialPageRoute(builder: (context)=> HomeScreen(),);
   HomeScreen({Key? key}) : super(key: key);
 
   final ValueNotifier<int> pageIndex = ValueNotifier(0);
@@ -41,15 +42,7 @@ class HomeScreen extends StatelessWidget {
         // elevation: 0,
         title: ValueListenableBuilder(
           valueListenable: title,
-          builder: (BuildContext context, String value, _) {
-            return Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            );
-          },
+          builder: (BuildContext context, String value, _) => Text(value)
         ),
         leadingWidth: 53,
         leading: Align(
@@ -57,7 +50,7 @@ class HomeScreen extends StatelessWidget {
           child: IconBackground(
             icon: Icons.search,
             onTap: () {
-              print('TODO search');
+              logger.i('TODO search');
             },
           ),
         ),
