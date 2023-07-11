@@ -35,10 +35,10 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: Theme.of(context).iconTheme,
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        // iconTheme: Theme.of(context).iconTheme,
+        // centerTitle: true,
+        // backgroundColor: Colors.transparent,
+        // elevation: 0,
         title: ValueListenableBuilder(
           valueListenable: title,
           builder: (BuildContext context, String value, _) {
