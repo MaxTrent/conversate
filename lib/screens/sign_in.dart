@@ -110,7 +110,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CHATTER'),
+        title: const Text('CONVERSATE'),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

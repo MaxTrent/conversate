@@ -5,15 +5,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+import 'api/api_key.dart';
 import 'firebase_options.dart';
 
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  options: DefaultFirebaseOptions.currentPlatform;
-  final client = StreamChatClient((streamKey));
+  await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform
+  );
+
+  final client = StreamChatClient((streamApiKey));
   runApp(MyApp(
     client: client, appTheme: AppTheme(),
   ));
@@ -42,7 +45,7 @@ class MyApp extends StatelessWidget {
             client: client,
             child: ChannelsBloc(child: UsersBloc(child: child!)));
       },
-      home: const SelectUserScreen(),
+      home: const SplashScreen(),
     );
   }
 }

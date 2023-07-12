@@ -84,7 +84,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       } catch (e, st) {
         logger.e('Sign up error', e, st);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('An error occured')),
+          const SnackBar(content: Text('An error occurred')),
         );
       }
       setState(() {
@@ -133,7 +133,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CHATTER'),
+        title: const Text('CONVERSATE'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,

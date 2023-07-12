@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart' as log;
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'api/api_key.dart';
 
-const streamKey = 'damtnhpsfnk5';
+const streamKey = streamApiKey;
 var logger = log.Logger();
 
 
